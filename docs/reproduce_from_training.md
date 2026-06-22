@@ -17,7 +17,8 @@ The reproduction path is:
 The one-command entry point is:
 
 ```bash
-cd /mnt/proj/babyllm
+git clone https://github.com/Trevoewu/NLPCC_Chinese_Babylm_NanoChat.git
+cd NLPCC_Chinese_Babylm_NanoChat
 bash scripts/reproduce_from_training.sh
 ```
 
@@ -177,10 +178,9 @@ eval_configs/config_final.yaml
 Run directly from a trained/exported model:
 
 ```bash
-PROJECT_DIR=/mnt/proj/babyllm \
-MODEL_DIR=/mnt/proj/babyllm/chinese_cache_reproduce/hf_models/zh-d22-step10000-layer08-selected \
-RESULTS_DIR=/mnt/proj/babyllm/chinese_cache_reproduce/final_eval_results \
-RESULT_JSON=/mnt/proj/babyllm/chinese_cache_reproduce/chinesebabylm_2026_final_results.json \
+MODEL_DIR="${PWD}/chinese_cache_reproduce/hf_models/zh-d22-step10000-layer08-selected" \
+RESULTS_DIR="${PWD}/chinese_cache_reproduce/final_eval_results" \
+RESULT_JSON="${PWD}/chinese_cache_reproduce/chinesebabylm_2026_final_results.json" \
 bash scripts/run_final_eval.sh
 ```
 
@@ -224,8 +224,8 @@ b0a402ff1a3c70f7cf796671c4dc3d6c1c66ba0b1d5708d668b6459db73410e6
 The reproduction script accepts environment overrides:
 
 ```bash
-BASE_DIR=/mnt/proj/repro_cache \
-DATA_DIR=/mnt/proj/data/babylm-zho-100M \
+BASE_DIR=/path/to/repro_cache \
+DATA_DIR=/path/to/babylm-zho-100M \
 CUDA_VISIBLE_DEVICES=0 \
 PARALLEL_EVAL=0 \
 bash scripts/reproduce_from_training.sh

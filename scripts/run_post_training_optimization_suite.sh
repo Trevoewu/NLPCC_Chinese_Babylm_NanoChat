@@ -3,9 +3,9 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-export BABYLLM_DIR="${BABYLLM_DIR:-/mnt/proj/babyllm}"
-export PIPELINE_DIR="${PIPELINE_DIR:-/mnt/proj/chinese-babylm-eval-pipeline-official}"
-export PYTHON="${PYTHON:-/mnt/proj/babyllm/.venv/bin/python}"
+export BABYLLM_DIR="${BABYLLM_DIR:-${PWD}}"
+export PIPELINE_DIR="${PIPELINE_DIR:-${BABYLLM_DIR}/.external/chinese-babylm-eval-pipeline-official}"
+export PYTHON="${PYTHON:-${BABYLLM_DIR}/.venv/bin/python}"
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
 export HF_ENDPOINT="${HF_ENDPOINT:-https://hf-mirror.com}"
 export PYTHONUNBUFFERED=1

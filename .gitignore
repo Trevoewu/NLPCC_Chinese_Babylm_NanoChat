@@ -14,10 +14,12 @@ __pycache__/
 .venv/
 .eval-venv/
 .plot-venv/
+.venv-final-eval/
 .env
 
 # Local Codex scratch
 .codex-tmp/
+.external/
 
 # Large/generated training artifacts
 chinese_cache/base_checkpoints/

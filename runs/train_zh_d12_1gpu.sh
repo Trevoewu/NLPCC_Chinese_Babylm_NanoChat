@@ -1,11 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
-cd /home/trevor/babyllm
+cd "$(dirname "$0")/.."
 
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
 export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}"
-export NANOCHAT_BASE_DIR="${NANOCHAT_BASE_DIR:-/home/trevor/babyllm/chinese_cache}"
+export NANOCHAT_BASE_DIR="${NANOCHAT_BASE_DIR:-${PWD}/chinese_cache}"
 export NANOCHAT_DTYPE="${NANOCHAT_DTYPE:-bfloat16}"
 export NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS="${NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS:-1}"
 

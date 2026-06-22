@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BABYLLM_DIR="${BABYLLM_DIR:-/mnt/proj/babyllm}"
-PIPELINE_DIR="${PIPELINE_DIR:-/mnt/proj/chinese-babylm-eval-pipeline-official}"
-RESULTS_DIR="${RESULTS_DIR:-/mnt/proj/babyllm/chinese_cache/eval_results_optimization}"
-CONFIG_DIR="${CONFIG_DIR:-/mnt/proj/babyllm/chinese_cache/optimization_eval_configs}"
-PYTHON="${PYTHON:-/mnt/proj/babyllm/.venv/bin/python}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT_BABYLLM_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+BABYLLM_DIR="${BABYLLM_DIR:-${DEFAULT_BABYLLM_DIR}}"
+PIPELINE_DIR="${PIPELINE_DIR:-${BABYLLM_DIR}/.external/chinese-babylm-eval-pipeline-official}"
+RESULTS_DIR="${RESULTS_DIR:-${BABYLLM_DIR}/chinese_cache/eval_results_optimization}"
+CONFIG_DIR="${CONFIG_DIR:-${BABYLLM_DIR}/chinese_cache/optimization_eval_configs}"
+PYTHON="${PYTHON:-${BABYLLM_DIR}/.venv/bin/python}"
 
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
 export HF_ENDPOINT="${HF_ENDPOINT:-https://hf-mirror.com}"

@@ -24,7 +24,8 @@ def main() -> None:
     if not token:
         raise SystemExit("HF_TOKEN is not set")
 
-    folder = Path("/mnt/proj/babyllm/chinese_cache/hf_models/zh-d22-step10000")
+    default_folder = Path(__file__).resolve().parent / "chinese_cache/hf_models/zh-d22-step10000"
+    folder = Path(os.environ.get("MODEL_DIR", default_folder))
     required = [
         "config.json",
         "configuration_nanochat.py",

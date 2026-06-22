@@ -10,6 +10,9 @@ from pathlib import Path
 import torch
 
 
+DEFAULT_PROJECT_DIR = Path(__file__).resolve().parents[1]
+
+
 CONFIGURATION_PY = r'''
 from transformers import PretrainedConfig
 
@@ -446,10 +449,16 @@ class NanoChatTokenizer(PreTrainedTokenizer):
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--checkpoint-dir", default="/mnt/proj/babyllm/chinese_cache/base_checkpoints/zh-d22-2gpu")
+    parser.add_argument(
+        "--checkpoint-dir",
+        default=str(DEFAULT_PROJECT_DIR / "chinese_cache/base_checkpoints/zh-d22-2gpu"),
+    )
     parser.add_argument("--step", type=int, default=10000)
-    parser.add_argument("--tokenizer-dir", default="/mnt/proj/babyllm/chinese_cache/tokenizer")
-    parser.add_argument("--output-dir", default="/mnt/proj/babyllm/chinese_cache/hf_models/zh-d22-step10000")
+    parser.add_argument("--tokenizer-dir", default=str(DEFAULT_PROJECT_DIR / "chinese_cache/tokenizer"))
+    parser.add_argument(
+        "--output-dir",
+        default=str(DEFAULT_PROJECT_DIR / "chinese_cache/hf_models/zh-d22-step10000"),
+    )
     parser.add_argument(
         "--representation-layer",
         type=int,

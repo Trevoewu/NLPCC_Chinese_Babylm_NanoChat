@@ -3,7 +3,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-export NANOCHAT_BASE_DIR="${NANOCHAT_BASE_DIR:-/mnt/proj/babyllm/chinese_cache_clean}"
+export NANOCHAT_BASE_DIR="${NANOCHAT_BASE_DIR:-${PWD}/chinese_cache_clean}"
 export NANOCHAT_DTYPE="${NANOCHAT_DTYPE:-bfloat16}"
 export NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS="${NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS:-1}"
 export NANOCHAT_DISABLE_COMPILE="${NANOCHAT_DISABLE_COMPILE:-1}"

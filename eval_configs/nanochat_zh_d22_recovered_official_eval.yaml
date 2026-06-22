@@ -3,7 +3,7 @@ models:
     backend: nanochat_causal
 
 eval_dir: evaluation_data
-results_dir: /mnt/proj/babyllm/chinese_cache/eval_results
+results_dir: chinese_cache/eval_results
 
 tasks:
   zero_shot:

@@ -4,7 +4,7 @@ set -euo pipefail
 # Rebuild a runnable nanochat environment after container reset.
 #
 # Usage:
-#   cd /mnt/proj/babyllm
+#   cd NLPCC_Chinese_Babylm_NanoChat
 #   bash runs/setup_recovered_env.sh
 
 export HF_ENDPOINT="${HF_ENDPOINT:-https://hf-mirror.com}"

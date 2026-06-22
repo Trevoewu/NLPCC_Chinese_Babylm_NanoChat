@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PROJECT_DIR="${PROJECT_DIR:-/mnt/proj/babyllm}"
-PIPELINE_DIR="${PIPELINE_DIR:-/mnt/proj/chinese-babylm-pipeline-final}"
-VENV_DIR="${VENV_DIR:-/mnt/proj/babyllm/.venv-final-eval}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT_PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+PROJECT_DIR="${PROJECT_DIR:-${DEFAULT_PROJECT_DIR}}"
+PIPELINE_DIR="${PIPELINE_DIR:-${PROJECT_DIR}/.external/chinese-babylm-pipeline-final}"
+VENV_DIR="${VENV_DIR:-${PROJECT_DIR}/.venv-final-eval}"
 BOOTSTRAP_PYTHON="${BOOTSTRAP_PYTHON:-/opt/conda/bin/python}"
-MODEL_DIR="${MODEL_DIR:-/mnt/proj/babyllm/chinese_cache/hf_models/zh-d22-step10000-layer08-selected}"
+MODEL_DIR="${MODEL_DIR:-${PROJECT_DIR}/chinese_cache/hf_models/zh-d22-step10000-layer08-selected}"
 MODEL_REPO="l0ulan/chinese-babylm-nanochat-d22-step10000"
 MODEL_REVISION="7945c2a48ea4b4555509616b6942116782ef6295"
 CONFIG_SRC="${PROJECT_DIR}/eval_configs/config_final.yaml"
@@ -21,6 +24,7 @@ export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
 
 if [[ ! -f "${PIPELINE_DIR}/pipeline.py" ]]; then
   archive="$(mktemp --suffix=.zip)"
+  mkdir -p "$(dirname "${PIPELINE_DIR}")"
   wget -q -O "${archive}" \
     https://github.com/chinese-babylm/chinese-babylm-pipeline-final/archive/refs/heads/main.zip
   rm -rf "${PIPELINE_DIR}" "${PIPELINE_DIR}-main"

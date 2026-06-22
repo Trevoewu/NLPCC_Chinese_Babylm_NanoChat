@@ -7,7 +7,8 @@ This workspace adapts `karpathy/nanochat` for the NLPCC Chinese BabyLM task. It 
 For organizer-side reproduction from training data through final scores, use:
 
 ```bash
-cd /mnt/proj/babyllm
+git clone https://github.com/Trevoewu/NLPCC_Chinese_Babylm_NanoChat.git
+cd NLPCC_Chinese_Babylm_NanoChat
 bash scripts/reproduce_from_training.sh
 ```
 
@@ -19,16 +20,13 @@ docs/reproduce_from_training.md
 
 The reproduction pipeline uses the official `chinese-babylm-org/babylm-zho-100M` corpus, trains the 32K tokenizer, trains the d22 base model from random initialization for 10,000 steps, exports the step-10000 checkpoint as HuggingFace `trust_remote_code` CausalLM with cognitive `representation_layer=8`, and runs the official final pipeline.
 
-Current remote workspace:
+The script defaults to repository-local generated directories. Override paths when needed:
 
-```text
-/mnt/proj/babyllm
-```
-
-Related data source:
-
-```text
-/mnt/proj/chinese-babylm
+```bash
+BASE_DIR=/path/to/cache \
+DATA_DIR=/path/to/babylm-zho-100M \
+PIPELINE_DIR=/path/to/chinese-babylm-pipeline-final \
+bash scripts/reproduce_from_training.sh
 ```
 
 ## Current Artifacts
@@ -36,28 +34,28 @@ Related data source:
 Tokenizer:
 
 ```text
-/mnt/proj/babyllm/chinese_cache/tokenizer/tokenizer.pkl
-/mnt/proj/babyllm/chinese_cache/tokenizer/token_bytes.pt
+chinese_cache/tokenizer/tokenizer.pkl
+chinese_cache/tokenizer/token_bytes.pt
 ```
 
 Final base checkpoint:
 
 ```text
-/mnt/proj/babyllm/chinese_cache/base_checkpoints/zh-d22-2gpu/model_010000.pt
-/mnt/proj/babyllm/chinese_cache/base_checkpoints/zh-d22-2gpu/meta_010000.json
+chinese_cache/base_checkpoints/zh-d22-2gpu/model_010000.pt
+chinese_cache/base_checkpoints/zh-d22-2gpu/meta_010000.json
 ```
 
 Loss curve:
 
 ```text
-/mnt/proj/babyllm/docs/zh_d22_recovered_loss_curve.png
-/mnt/proj/babyllm/docs/zh_d22_recovered_loss_curve.csv
+docs/zh_d22_recovered_loss_curve.png
+docs/zh_d22_recovered_loss_curve.csv
 ```
 
 Training log:
 
 ```text
-/mnt/proj/babyllm/runs/logs/base_train_zh_d22_1gpu_recovered_20260527_181434.log
+runs/logs/base_train_zh_d22_1gpu_recovered_20260527_181434.log
 ```
 
 ## Environment
@@ -65,7 +63,6 @@ Training log:
 Activate the restored environment:
 
 ```bash
-cd /mnt/proj/babyllm
 . .venv/bin/activate
 ```
 
@@ -73,7 +70,7 @@ Common environment variables:
 
 ```bash
 export HF_ENDPOINT=https://hf-mirror.com
-export NANOCHAT_BASE_DIR=/mnt/proj/babyllm/chinese_cache
+export NANOCHAT_BASE_DIR="${PWD}/chinese_cache"
 export NANOCHAT_DTYPE=bfloat16
 export NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS=1
 export NANOCHAT_DISABLE_COMPILE=1
@@ -82,7 +79,6 @@ export NANOCHAT_DISABLE_COMPILE=1
 If the environment is missing after container reset:
 
 ```bash
-cd /mnt/proj/babyllm
 bash runs/setup_recovered_env.sh
 ```
 
@@ -91,16 +87,15 @@ bash runs/setup_recovered_env.sh
 The Chinese BabyLM dataset is linked here:
 
 ```text
-/mnt/proj/babyllm/data/babylm-zho-100M
+data/babylm-zho-100M
 ```
 
 Prepare nanochat parquet shards:
 
 ```bash
-cd /mnt/proj/babyllm
 . .venv/bin/activate
 
-export NANOCHAT_BASE_DIR=/mnt/proj/babyllm/chinese_cache
+export NANOCHAT_BASE_DIR="${PWD}/chinese_cache"
 
 python scripts/prepare_chinese_babylm.py \
   --data-dir data/babylm-zho-100M \
@@ -123,10 +118,9 @@ shards: 17
 Train the 32K Chinese tokenizer:
 
 ```bash
-cd /mnt/proj/babyllm
 . .venv/bin/activate
 
-export NANOCHAT_BASE_DIR=/mnt/proj/babyllm/chinese_cache
+export NANOCHAT_BASE_DIR="${PWD}/chinese_cache"
 
 python -m nanochat.report reset
 python -m scripts.tok_train \
@@ -166,11 +160,10 @@ The successful run used one RTX 5090. Two-card DDP under the current HAMI/NCCL e
 Command used:
 
 ```bash
-cd /mnt/proj/babyllm
 . .venv/bin/activate
 
 export HF_ENDPOINT=https://hf-mirror.com
-export NANOCHAT_BASE_DIR=/mnt/proj/babyllm/chinese_cache
+export NANOCHAT_BASE_DIR="${PWD}/chinese_cache"
 export NANOCHAT_DTYPE=bfloat16
 export NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS=1
 export NANOCHAT_DISABLE_COMPILE=1
@@ -207,7 +200,6 @@ peak memory: ~19.1 GiB
 Generate a loss curve from the log:
 
 ```bash
-cd /mnt/proj/babyllm
 . .venv/bin/activate
 
 python - <<'PY'
@@ -243,11 +235,10 @@ Use `scripts/base_cli.py` for base-model continuation. Do not use `scripts/chat_
 One-shot continuation:
 
 ```bash
-cd /mnt/proj/babyllm
 . .venv/bin/activate
 
 CUDA_VISIBLE_DEVICES=0 \
-NANOCHAT_BASE_DIR=/mnt/proj/babyllm/chinese_cache \
+NANOCHAT_BASE_DIR="${PWD}/chinese_cache" \
 NANOCHAT_DTYPE=bfloat16 \
 NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS=1 \
 NANOCHAT_DISABLE_COMPILE=1 \
@@ -265,7 +256,7 @@ Interactive continuation:
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 \
-NANOCHAT_BASE_DIR=/mnt/proj/babyllm/chinese_cache \
+NANOCHAT_BASE_DIR="${PWD}/chinese_cache" \
 NANOCHAT_DTYPE=bfloat16 \
 NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS=1 \
 NANOCHAT_DISABLE_COMPILE=1 \
@@ -288,36 +279,33 @@ This is a base model, so it continues text. It is not an instruction/chat model.
 
 ## Evaluation
 
-Official Chinese BabyLM eval pipeline path:
+Official Chinese BabyLM final eval pipeline:
 
 ```text
-/mnt/proj/chinese-babylm-eval-pipeline
+https://github.com/chinese-babylm/chinese-babylm-pipeline-final
 ```
 
 Recovered nanochat eval configs:
 
 ```text
-/mnt/proj/babyllm/eval_configs/nanochat_zh_d22_full_eval.yaml
-/mnt/proj/babyllm/eval_configs/nanochat_zh_d22_official_eval.yaml
+eval_configs/nanochat_zh_d22_full_eval.yaml
+eval_configs/nanochat_zh_d22_official_eval.yaml
+eval_configs/config_final.yaml
 ```
 
 Previous official-style result before the container reset was documented in:
 
 ```text
-/mnt/proj/babyllm/docs/chinese_babylm_eval_todo.md
+docs/chinese_babylm_eval_todo.md
 ```
 
-If re-running eval, update `NANOCHAT_BASE_DIR`, `NANOCHAT_MODEL_TAG`, and `NANOCHAT_MODEL_STEP` for the current checkpoint:
+If re-running final eval from an exported model:
 
 ```bash
-export HF_ENDPOINT=https://hf-mirror.com
-export NANOCHAT_REPO=/mnt/proj/babyllm
-export NANOCHAT_BASE_DIR=/mnt/proj/babyllm/chinese_cache
-export NANOCHAT_DTYPE=bfloat16
-export NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS=1
-export NANOCHAT_DISABLE_COMPILE=1
-export NANOCHAT_MODEL_TAG=zh-d22-2gpu
-export NANOCHAT_MODEL_STEP=10000
+MODEL_DIR="${PWD}/chinese_cache/hf_models/zh-d22-step10000-layer08-selected" \
+RESULTS_DIR="${PWD}/chinese_cache/final_eval_results" \
+RESULT_JSON="${PWD}/chinese_cache/chinesebabylm_2026_final_results.json" \
+bash scripts/run_final_eval.sh
 ```
 
 ### Baseline Comparison
