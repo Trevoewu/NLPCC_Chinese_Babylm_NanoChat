@@ -1,6 +1,6 @@
 # Chinese BabyLM nanochat
 
-This workspace adapts `karpathy/nanochat` for the NLPCC Chinese BabyLM task. It contains the recovered code, Chinese tokenizer/data preparation scripts, a trained d22 base checkpoint, and a base-model continuation CLI.
+This workspace adapts `karpathy/nanochat` for the NLPCC Chinese BabyLM task. It contains the recovered training/evaluation code, Chinese tokenizer/data preparation scripts, final evaluation artifacts, and a base-model continuation CLI. Large generated artifacts such as tokenizer files, training shards, checkpoints, and HuggingFace model exports are intentionally not committed; the reproduction script regenerates or downloads them as needed.
 
 ## Organizer Reproduction
 
@@ -29,20 +29,28 @@ PIPELINE_DIR=/path/to/chinese-babylm-pipeline-final \
 bash scripts/reproduce_from_training.sh
 ```
 
-## Current Artifacts
+## Generated Artifacts
+
+These paths are produced by the reproduction scripts and are not stored in Git, except for the archived final evaluation files under `chinese_cache/final_eval_artifacts/`. In `scripts/reproduce_from_training.sh`, `BASE_DIR` defaults to `chinese_cache_reproduce`.
 
 Tokenizer:
 
 ```text
-chinese_cache/tokenizer/tokenizer.pkl
-chinese_cache/tokenizer/token_bytes.pt
+$BASE_DIR/tokenizer/tokenizer.pkl
+$BASE_DIR/tokenizer/token_bytes.pt
 ```
 
 Final base checkpoint:
 
 ```text
-chinese_cache/base_checkpoints/zh-d22-2gpu/model_010000.pt
-chinese_cache/base_checkpoints/zh-d22-2gpu/meta_010000.json
+$BASE_DIR/base_checkpoints/zh-d22-2gpu/model_010000.pt
+$BASE_DIR/base_checkpoints/zh-d22-2gpu/meta_010000.json
+```
+
+HF export:
+
+```text
+$BASE_DIR/hf_models/zh-d22-step10000-layer08-selected/
 ```
 
 Loss curve:
@@ -70,7 +78,7 @@ Common environment variables:
 
 ```bash
 export HF_ENDPOINT=https://hf-mirror.com
-export NANOCHAT_BASE_DIR="${PWD}/chinese_cache"
+export NANOCHAT_BASE_DIR="${PWD}/chinese_cache_reproduce"
 export NANOCHAT_DTYPE=bfloat16
 export NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS=1
 export NANOCHAT_DISABLE_COMPILE=1
@@ -95,7 +103,7 @@ Prepare nanochat parquet shards:
 ```bash
 . .venv/bin/activate
 
-export NANOCHAT_BASE_DIR="${PWD}/chinese_cache"
+export NANOCHAT_BASE_DIR="${PWD}/chinese_cache_reproduce"
 
 python scripts/prepare_chinese_babylm.py \
   --data-dir data/babylm-zho-100M \
@@ -120,7 +128,7 @@ Train the 32K Chinese tokenizer:
 ```bash
 . .venv/bin/activate
 
-export NANOCHAT_BASE_DIR="${PWD}/chinese_cache"
+export NANOCHAT_BASE_DIR="${PWD}/chinese_cache_reproduce"
 
 python -m nanochat.report reset
 python -m scripts.tok_train \
@@ -163,7 +171,7 @@ Command used:
 . .venv/bin/activate
 
 export HF_ENDPOINT=https://hf-mirror.com
-export NANOCHAT_BASE_DIR="${PWD}/chinese_cache"
+export NANOCHAT_BASE_DIR="${PWD}/chinese_cache_reproduce"
 export NANOCHAT_DTYPE=bfloat16
 export NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS=1
 export NANOCHAT_DISABLE_COMPILE=1
@@ -238,7 +246,7 @@ One-shot continuation:
 . .venv/bin/activate
 
 CUDA_VISIBLE_DEVICES=0 \
-NANOCHAT_BASE_DIR="${PWD}/chinese_cache" \
+NANOCHAT_BASE_DIR="${PWD}/chinese_cache_reproduce" \
 NANOCHAT_DTYPE=bfloat16 \
 NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS=1 \
 NANOCHAT_DISABLE_COMPILE=1 \
@@ -256,7 +264,7 @@ Interactive continuation:
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 \
-NANOCHAT_BASE_DIR="${PWD}/chinese_cache" \
+NANOCHAT_BASE_DIR="${PWD}/chinese_cache_reproduce" \
 NANOCHAT_DTYPE=bfloat16 \
 NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS=1 \
 NANOCHAT_DISABLE_COMPILE=1 \
@@ -285,11 +293,10 @@ Official Chinese BabyLM final eval pipeline:
 https://github.com/chinese-babylm/chinese-babylm-pipeline-final
 ```
 
-Recovered nanochat eval configs:
+Evaluation configs:
 
 ```text
-eval_configs/nanochat_zh_d22_full_eval.yaml
-eval_configs/nanochat_zh_d22_official_eval.yaml
+eval_configs/config.yaml
 eval_configs/config_final.yaml
 ```
 
@@ -302,9 +309,9 @@ docs/chinese_babylm_eval_todo.md
 If re-running final eval from an exported model:
 
 ```bash
-MODEL_DIR="${PWD}/chinese_cache/hf_models/zh-d22-step10000-layer08-selected" \
-RESULTS_DIR="${PWD}/chinese_cache/final_eval_results" \
-RESULT_JSON="${PWD}/chinese_cache/chinesebabylm_2026_final_results.json" \
+MODEL_DIR="${PWD}/chinese_cache_reproduce/hf_models/zh-d22-step10000-layer08-selected" \
+RESULTS_DIR="${PWD}/chinese_cache_reproduce/final_eval_results" \
+RESULT_JSON="${PWD}/chinese_cache_reproduce/chinesebabylm_2026_final_results.json" \
 bash scripts/run_final_eval.sh
 ```
 
@@ -321,11 +328,30 @@ Our Hanzi scores use the June 6 refreshed evaluation data; baseline values are t
 
 ![Chinese BabyLM per-task baseline comparison](docs/selected_baseline_task_bars_custom_pink.png)
 
-Final official scores for `zh-d22-step10000`:
+Open/development scores for `zh-d22-step10000-layer08-selected`, used for the baseline comparison above:
 
 | Model | zhoblimp | hanzi_structure | hanzi_pinyin | word_fmri | fmri | afqmc | ocnli | tnews | cluewsc2020 | mean |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | `zh-d22-step10000-layer08-selected` | 67.45 | 52.35 | 51.00 | 55.80 | 10.66 | 68.61 | 55.59 | 51.31 | 59.54 | 52.48 |
+
+Submitted final pipeline scores from `chinese_cache/final_eval_artifacts/chinesebabylm_2026_final_results.json`:
+
+| Task | Score |
+| --- | ---: |
+| zhoblimp | 68.06 |
+| xcomps_zh | 54.46 |
+| hanzi_structure | 51.85 |
+| hanzi_pinyin | 49.35 |
+| hanzi_structure_hidden | 51.25 |
+| hanzi_pinyin_hidden | 49.05 |
+| word_fmri | 56.31 |
+| fmri | 11.62 |
+| afqmc | 68.95 |
+| ocnli | 65.36 |
+| tnews | 53.44 |
+| cluewsc2020 | 63.16 |
+| c3 | 29.01 |
+| diagnostic_nli | 52.54 |
 
 The model is competitive with several BabyLM-scale baselines, but remains below strong pretrained baselines such as `bert-base-chinese` and `Qwen3-0.6B`, especially on `zhoblimp`, `ocnli`, and `cluewsc2020`. This is expected for a base continuation model trained only on the Chinese BabyLM corpus without instruction tuning or additional large-scale pretraining.
 

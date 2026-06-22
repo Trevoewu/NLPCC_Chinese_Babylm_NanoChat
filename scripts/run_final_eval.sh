@@ -7,20 +7,30 @@ DEFAULT_PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 PROJECT_DIR="${PROJECT_DIR:-${DEFAULT_PROJECT_DIR}}"
 PIPELINE_DIR="${PIPELINE_DIR:-${PROJECT_DIR}/.external/chinese-babylm-pipeline-final}"
 VENV_DIR="${VENV_DIR:-${PROJECT_DIR}/.venv-final-eval}"
-BOOTSTRAP_PYTHON="${BOOTSTRAP_PYTHON:-/opt/conda/bin/python}"
-MODEL_DIR="${MODEL_DIR:-${PROJECT_DIR}/chinese_cache/hf_models/zh-d22-step10000-layer08-selected}"
+MODEL_DIR="${MODEL_DIR:-${PROJECT_DIR}/chinese_cache_reproduce/hf_models/zh-d22-step10000-layer08-selected}"
 MODEL_REPO="l0ulan/chinese-babylm-nanochat-d22-step10000"
 MODEL_REVISION="7945c2a48ea4b4555509616b6942116782ef6295"
 CONFIG_SRC="${PROJECT_DIR}/eval_configs/config_final.yaml"
 CONFIG_DST="${PIPELINE_DIR}/configs/babyllm_final.yaml"
-RESULT_JSON="${RESULT_JSON:-${PROJECT_DIR}/chinese_cache/chinesebabylm_2026_final_results.json}"
+RESULT_JSON="${RESULT_JSON:-${PROJECT_DIR}/chinese_cache_reproduce/chinesebabylm_2026_final_results.json}"
 REQUIREMENTS_STAMP="${VENV_DIR}/.final_pipeline_requirements_installed"
 PARALLEL_EVAL="${PARALLEL_EVAL:-1}"
-RESULTS_DIR="${RESULTS_DIR:-${PROJECT_DIR}/chinese_cache/final_eval_results}"
+RESULTS_DIR="${RESULTS_DIR:-${PROJECT_DIR}/chinese_cache_reproduce/final_eval_results}"
 
 export HF_ENDPOINT="${HF_ENDPOINT:-https://hf-mirror.com}"
 export TOKENIZERS_PARALLELISM=false
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
+
+if [[ -z "${BOOTSTRAP_PYTHON:-}" ]]; then
+  if command -v python3 >/dev/null 2>&1; then
+    BOOTSTRAP_PYTHON="$(command -v python3)"
+  elif command -v python >/dev/null 2>&1; then
+    BOOTSTRAP_PYTHON="$(command -v python)"
+  else
+    echo "No bootstrap Python found. Set BOOTSTRAP_PYTHON=/path/to/python." >&2
+    exit 1
+  fi
+fi
 
 if [[ ! -f "${PIPELINE_DIR}/pipeline.py" ]]; then
   archive="$(mktemp --suffix=.zip)"
@@ -100,8 +110,8 @@ cd "${PIPELINE_DIR}"
   word_fmri fmri \
   afqmc ocnli tnews cluewsc2020 c3 diagnostic_nli
 if [[ "${PARALLEL_EVAL}" == "1" ]]; then
-  GPU0_LOG="${PROJECT_DIR}/chinese_cache/final_eval_gpu0.log"
-  GPU1_LOG="${PROJECT_DIR}/chinese_cache/final_eval_gpu1.log"
+  GPU0_LOG="${PROJECT_DIR}/chinese_cache_reproduce/final_eval_gpu0.log"
+  GPU1_LOG="${PROJECT_DIR}/chinese_cache_reproduce/final_eval_gpu1.log"
 
   CUDA_VISIBLE_DEVICES=0 "${VENV_DIR}/bin/python" pipeline.py eval \
     --config "${CONFIG_DST}" --tasks \
