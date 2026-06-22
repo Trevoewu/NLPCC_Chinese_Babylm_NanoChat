@@ -90,6 +90,14 @@ If the environment is missing after container reset:
 bash runs/setup_recovered_env.sh
 ```
 
+For slow network links in China, set a PyPI mirror before running the setup:
+
+```bash
+export UV_DEFAULT_INDEX=https://pypi.tuna.tsinghua.edu.cn/simple
+export UV_TORCH_BACKEND=cu128
+bash runs/setup_recovered_env.sh
+```
+
 ## Data Preparation
 
 The Chinese BabyLM dataset is linked here:

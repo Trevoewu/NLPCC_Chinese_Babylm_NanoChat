@@ -24,6 +24,13 @@ bash scripts/reproduce_from_training.sh
 
 The script is restartable: if data, tokenizer, checkpoints, or exported model already exist under the chosen `BASE_DIR`, it reuses them.
 
+For slow network links in China, set a PyPI mirror before creating the environment or running the one-command reproduction:
+
+```bash
+export UV_DEFAULT_INDEX=https://pypi.tuna.tsinghua.edu.cn/simple
+export UV_TORCH_BACKEND=cu128
+```
+
 ## Hardware And Runtime
 
 The original final model was trained on one RTX 5090.
