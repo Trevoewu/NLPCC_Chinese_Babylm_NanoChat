@@ -7,13 +7,17 @@ set -euo pipefail
 # Expected runtime on the original machine: about 6-7 hours for training, plus
 # final evaluation time. The original final training run used one RTX 5090.
 
-PROJECT_DIR="${PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
-BASE_DIR="${BASE_DIR:-${PROJECT_DIR}/chinese_cache_reproduce}"
-DATA_DIR="${DATA_DIR:-${PROJECT_DIR}/data/babylm-zho-100M}"
+DEFAULT_PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+PROJECT_DIR="${PROJECT_DIR:-${DEFAULT_PROJECT_DIR}}"
+
+cd "${PROJECT_DIR}"
+
+BASE_DIR="${BASE_DIR:-chinese_cache_reproduce}"
+DATA_DIR="${DATA_DIR:-data/babylm-zho-100M}"
 MODEL_TAG="${MODEL_TAG:-zh-d22-2gpu}"
 TRAIN_STEPS="${TRAIN_STEPS:-10000}"
 HF_MODEL_DIR="${HF_MODEL_DIR:-${BASE_DIR}/hf_models/zh-d22-step10000-layer08-selected}"
-PIPELINE_DIR="${PIPELINE_DIR:-${PROJECT_DIR}/.external/chinese-babylm-pipeline-final}"
+PIPELINE_DIR="${PIPELINE_DIR:-.external/chinese-babylm-pipeline-final}"
 FINAL_RESULTS_DIR="${FINAL_RESULTS_DIR:-${BASE_DIR}/final_eval_results}"
 FINAL_RESULT_JSON="${FINAL_RESULT_JSON:-${BASE_DIR}/chinesebabylm_2026_final_results.json}"
 CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
@@ -28,13 +32,12 @@ export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}"
 export CUDA_VISIBLE_DEVICES
 export WANDB_MODE="${WANDB_MODE:-disabled}"
 
-cd "${PROJECT_DIR}"
-mkdir -p "${BASE_DIR}" "${PROJECT_DIR}/runs/logs"
+mkdir -p "${BASE_DIR}" "runs/logs"
 
 if [[ ! -x .venv/bin/python ]]; then
   bash runs/setup_recovered_env.sh
 fi
-PYTHON="${PYTHON:-${PROJECT_DIR}/.venv/bin/python}"
+PYTHON="${PYTHON:-.venv/bin/python}"
 
 if [[ ! -e "${DATA_DIR}" ]]; then
   echo "Downloading official Chinese BabyLM corpus to ${DATA_DIR}"
@@ -67,7 +70,7 @@ fi
 
 checkpoint="${BASE_DIR}/base_checkpoints/${MODEL_TAG}/model_$(printf "%06d" "${TRAIN_STEPS}").pt"
 if [[ ! -f "${checkpoint}" ]]; then
-  log="${PROJECT_DIR}/runs/logs/reproduce_${MODEL_TAG}_$(date +%Y%m%d_%H%M%S).log"
+  log="runs/logs/reproduce_${MODEL_TAG}_$(date +%Y%m%d_%H%M%S).log"
   echo "Training ${MODEL_TAG} to step ${TRAIN_STEPS}. Log: ${log}"
   "${PYTHON}" -m scripts.base_train \
     --depth 22 \
@@ -95,7 +98,7 @@ fi
   --representation-hidden-states-mode selected_only \
   --output-dir "${HF_MODEL_DIR}"
 
-PROJECT_DIR="${PROJECT_DIR}" \
+PROJECT_DIR="." \
 PIPELINE_DIR="${PIPELINE_DIR}" \
 MODEL_DIR="${HF_MODEL_DIR}" \
 RESULTS_DIR="${FINAL_RESULTS_DIR}" \

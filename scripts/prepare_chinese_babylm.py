@@ -47,6 +47,16 @@ def get_train_dataset(dataset):
     raise TypeError(f"Unsupported dataset type: {type(dataset)}")
 
 
+def display_path(path):
+    path = Path(path)
+    if not path.is_absolute():
+        return str(path)
+    try:
+        return str(path.relative_to(Path.cwd()))
+    except ValueError:
+        return str(path)
+
+
 def load_training_data(data_dir, text_column):
     """Load BabyLM text from common local formats.
 
@@ -66,7 +76,7 @@ def load_training_data(data_dir, text_column):
             return load_dataset("parquet", data_files=str(data_dir), split="train")
         raise ValueError(f"Unsupported data file type: {data_dir}")
 
-    if (data_dir / "dataset_info.json").exists() or (data_dir / "state.json").exists():
+    if any((data_dir / name).exists() for name in ("dataset_dict.json", "dataset_info.json", "state.json")):
         return get_train_dataset(load_from_disk(str(data_dir)))
 
     parquet_files = sorted(data_dir.rglob("*.parquet"))
@@ -81,7 +91,7 @@ def load_training_data(data_dir, text_column):
     if txt_files:
         return load_dataset("text", data_files=[str(path) for path in txt_files], split="train")
 
-    raise ValueError(f"No supported training files found under {data_dir}")
+    raise ValueError(f"No supported training files found under {display_path(data_dir)}")
 
 
 def validate_args(args):
@@ -140,9 +150,9 @@ def main():
     written.append(str(val_path))
 
     metadata = {
-        "source": str(args.data_dir),
-        "base_dir": str(base_dir),
-        "output_dir": str(output_dir),
+        "source": display_path(args.data_dir),
+        "base_dir": display_path(base_dir),
+        "output_dir": display_path(output_dir),
         "text_column": "text",
         "num_rows_total": len(train),
         "num_rows_train": len(split["train"]),
@@ -150,15 +160,15 @@ def main():
         "num_train_shards": args.num_train_shards,
         "val_fraction": args.val_fraction,
         "seed": args.seed,
-        "validation_shard": str(val_path),
+        "validation_shard": display_path(val_path),
     }
     metadata_path = base_dir / "chinese_babylm_data.json"
     metadata_path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
 
-    print(f"Prepared Chinese BabyLM data for nanochat in {output_dir}")
+    print(f"Prepared Chinese BabyLM data for nanochat in {display_path(output_dir)}")
     print(f"Rows: train={metadata['num_rows_train']:,}, val={metadata['num_rows_val']:,}")
     print(f"Shards: {len(written)}")
-    print(f"Metadata: {metadata_path}")
+    print(f"Metadata: {display_path(metadata_path)}")
 
 
 if __name__ == "__main__":
