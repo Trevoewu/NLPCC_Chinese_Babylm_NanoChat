@@ -1,0 +1,28 @@
+models:
+  - path: nanochat-zh-d22-final
+    backend: nanochat_causal
+
+eval_dir: evaluation_data
+results_dir: /home/trevor/babyllm/chinese_cache/eval_results
+
+tasks:
+  zero_shot:
+    - zhoblimp
+    - hanzi_structure
+    - hanzi_pinyin
+  cogbench:
+    - word_fmri
+    - fmri
+  finetune:
+    - afqmc
+    - ocnli
+    - tnews
+    - cluewsc2020
+
+finetune_hparams:
+  lr: 3e-5
+  batch_size: 16
+  max_epochs: 1
+  wsc_epochs: 3
+  sequence_length: 128
+  seed: 42

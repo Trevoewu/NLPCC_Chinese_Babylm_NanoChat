@@ -1,0 +1,41 @@
+Looking in indexes: https://pypi.tuna.tsinghua.edu.cn/simple
+Requirement already satisfied: tiktoken in /tmp/babyllm-final-eval-venv/lib/python3.11/site-packages (0.13.0)
+Requirement already satisfied: regex in /tmp/babyllm-final-eval-venv/lib/python3.11/site-packages (from tiktoken) (2024.11.6)
+Requirement already satisfied: requests in /tmp/babyllm-final-eval-venv/lib/python3.11/site-packages (from tiktoken) (2.32.3)
+Requirement already satisfied: charset-normalizer<4,>=2 in /tmp/babyllm-final-eval-venv/lib/python3.11/site-packages (from requests->tiktoken) (3.4.2)
+Requirement already satisfied: idna<4,>=2.5 in /tmp/babyllm-final-eval-venv/lib/python3.11/site-packages (from requests->tiktoken) (3.10)
+Requirement already satisfied: urllib3<3,>=1.21.1 in /tmp/babyllm-final-eval-venv/lib/python3.11/site-packages (from requests->tiktoken) (2.4.0)
+Requirement already satisfied: certifi>=2017.4.17 in /tmp/babyllm-final-eval-venv/lib/python3.11/site-packages (from requests->tiktoken) (2025.4.26)
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+[HAMI-core Msg(14991:126336059135808:libvgpu.c:856)]: Initializing.....
+[HAMI-core Msg(14991:126336059135808:libvgpu.c:878)]: Initialized
+[HAMI-core Msg(14991:126336059135808:multiprocess_memory_limit.c:455)]: Calling exit handler 14991
+Downloading / preparing evaluation data into: evaluation_data
+
+  Skipping zhoblimp (data already exists). Use --force-download to re-download.
+  Skipping xcomps_zh (data already exists). Use --force-download to re-download.
+  Skipping hanzi_structure (data already exists). Use --force-download to re-download.
+  Skipping hanzi_pinyin (data already exists). Use --force-download to re-download.
+  Skipping hanzi_structure_hidden (data already exists). Use --force-download to re-download.
+  Skipping hanzi_pinyin_hidden (data already exists). Use --force-download to re-download.
+  Skipping cogbench (data already exists). Use --force-download to re-download.
+  Skipping afqmc (data already exists). Use --force-download to re-download.
+  Skipping ocnli (data already exists). Use --force-download to re-download.
+  Skipping tnews (data already exists). Use --force-download to re-download.
+  Skipping cluewsc2020 (data already exists). Use --force-download to re-download.
+  Skipping c3 (data already exists). Use --force-download to re-download.
+  Skipping diagnostic_nli (data already exists). Use --force-download to re-download.
+
+All datasets prepared.
+  Reading babyllm_final.yaml ...
+
+Collected results for 1 model(s).
+
+=========================================================================================================================================================================================================================================================================================
+ Model                                     zhoblimp        xcomps_zh  hanzi_structure     hanzi_pinyin hanzi_structure_hidden hanzi_pinyin_hidden        word_fmri             fmri            afqmc            ocnli            tnews      cluewsc2020               c3   diagnostic_nli
+=========================================================================================================================================================================================================================================================================================
+ zh-d22-step10000-layer08-selected            68.06            54.46            51.85            49.35            51.25            49.05            56.31            11.62            68.95            65.36            53.44            63.16            29.01            52.54
+=========================================================================================================================================================================================================================================================================================
+
+  Exported: /mnt/proj/babyllm/chinese_cache/chinesebabylm_2026_final_results.json
+Final leaderboard JSON: /mnt/proj/babyllm/chinese_cache/chinesebabylm_2026_final_results.json

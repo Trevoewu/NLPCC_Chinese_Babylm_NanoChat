@@ -1,0 +1,44 @@
+{
+  "zhoblimp": {
+    "accuracy": 0.6806
+  },
+  "xcomps_zh": {
+    "accuracy": 0.5446
+  },
+  "hanzi_structure": {
+    "accuracy": 0.5185
+  },
+  "hanzi_pinyin": {
+    "accuracy": 0.4935
+  },
+  "hanzi_structure_hidden": {
+    "accuracy": 0.5125
+  },
+  "hanzi_pinyin_hidden": {
+    "accuracy": 0.4905
+  },
+  "word_fmri": {
+    "mean": 0.56314126258352
+  },
+  "fmri": {
+    "mean": 0.11616738771053958
+  },
+  "afqmc": {
+    "accuracy": 0.6895273401297498
+  },
+  "ocnli": {
+    "accuracy": 0.6535593220338982
+  },
+  "tnews": {
+    "accuracy": 0.5344
+  },
+  "cluewsc2020": {
+    "accuracy": 0.631578947368421
+  },
+  "c3": {
+    "accuracy": 0.29009433962264153
+  },
+  "diagnostic_nli": {
+    "accuracy": 0.5254476908576814
+  }
+}

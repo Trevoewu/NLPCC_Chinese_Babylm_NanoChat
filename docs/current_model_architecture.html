@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chinese BabyLLM d22 Architecture</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f8fb;
+      --ink: #18202f;
+      --muted: #5b6575;
+      --line: #d8dee8;
+      --panel: #ffffff;
+      --blue: #2563eb;
+      --cyan: #0891b2;
+      --green: #15803d;
+      --amber: #b45309;
+      --red: #b91c1c;
+      --slate: #334155;
+      --shadow: 0 10px 28px rgba(20, 30, 55, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    header {
+      padding: 28px 32px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #ffffff;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.2;
+      font-weight: 760;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    main {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 24px 28px 40px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+      min-height: 86px;
+    }
+
+    .metric .label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .metric .value {
+      display: block;
+      font-size: 22px;
+      font-weight: 760;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(650px, 1.55fr) minmax(360px, 0.9fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 17px;
+      font-weight: 740;
+      letter-spacing: 0;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: 170px 28px minmax(280px, 1fr) 28px 170px;
+      gap: 0;
+      align-items: center;
+    }
+
+    .node {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+      padding: 14px;
+      min-height: 86px;
+    }
+
+    .node strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .node span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .arrow {
+      text-align: center;
+      color: var(--slate);
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .stack {
+      border: 1px solid var(--blue);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f8fbff;
+    }
+
+    .stack-head {
+      background: #e8f0ff;
+      border-bottom: 1px solid #b8ccff;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 740;
+    }
+
+    .block {
+      display: grid;
+      grid-template-columns: minmax(130px, 0.78fr) minmax(200px, 1.2fr) minmax(160px, 1fr);
+      gap: 10px;
+      padding: 12px;
+      border-bottom: 1px solid #dbe7ff;
+    }
+
+    .block:last-child { border-bottom: 0; }
+
+    .sub {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #ffffff;
+      padding: 10px;
+      min-height: 74px;
+    }
+
+    .sub .name {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .sub .desc {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: #eef2f7;
+      color: #344256;
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .param-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 146px minmax(130px, 1fr) 96px;
+      gap: 10px;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .bar-label { color: var(--slate); }
+
+    .bar-track {
+      height: 16px;
+      border-radius: 999px;
+      background: #eef2f7;
+      overflow: hidden;
+      border: 1px solid #d8dee8;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: inherit;
+    }
+
+    .bar-value {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: var(--slate);
+      white-space: nowrap;
+    }
+
+    .blue { background: var(--blue); }
+    .cyan { background: var(--cyan); }
+    .green { background: var(--green); }
+    .amber { background: var(--amber); }
+    .red { background: var(--red); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 9px 8px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    td:last-child, th:last-child { text-align: right; }
+
+    .formula {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.55;
+      color: #253041;
+      overflow-x: auto;
+    }
+
+    .notes {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      gap: 18px;
+    }
+
+    .note-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 1050px) {
+      .metrics { grid-template-columns: repeat(3, 1fr); }
+      .layout { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: 1fr; gap: 10px; }
+      .arrow { transform: rotate(90deg); }
+      .notes { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      header { padding: 22px 18px 16px; }
+      main { padding: 18px 14px 30px; }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .metric .value { font-size: 18px; }
+      .block { grid-template-columns: 1fr; }
+      .bar-row { grid-template-columns: 1fr; }
+      .bar-value { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Chinese BabyLLM Base Model Architecture</h1>
+    <p class="subtitle">Current nanochat d22 run: full-parameter model with a 523M core Transformer matrix budget.</p>
+  </header>
+
+  <main>
+    <div class="metrics" aria-label="model summary">
+      <div class="metric"><span class="label">Depth</span><span class="value">22 layers</span></div>
+      <div class="metric"><span class="label">Hidden Width</span><span class="value">1408</span></div>
+      <div class="metric"><span class="label">Attention Heads</span><span class="value">22 x 64</span></div>
+      <div class="metric"><span class="label">Context Length</span><span class="value">1024</span></div>
+      <div class="metric"><span class="label">Vocabulary</span><span class="value">32,768</span></div>
+      <div class="metric"><span class="label">Total Parameters</span><span class="value">1.123B</span></div>
+    </div>
+
+    <div class="layout">
+      <section>
+        <h2>Forward Path</h2>
+        <div class="flow">
+          <div class="node">
+            <strong>Token IDs</strong>
+            <span>Chinese BabyLLM tokenizer output, sequence length 1024.</span>
+          </div>
+          <div class="arrow">→</div>
+          <div class="stack">
+            <div class="stack-head">
+              <span>Transformer Stack</span>
+              <span>22 repeated blocks</span>
+            </div>
+            <div class="block">
+              <div class="sub">
+                <span class="name">Input Mixing</span>
+                <span class="desc">Token embedding, RMSNorm, smear gate, rotary position cache.</span>
+                <span class="tag">n_embd = 1408</span>
+              </div>
+              <div class="sub">
+                <span class="name">Causal Self-Attention</span>
+                <span class="desc">Q, K, V and output projection are all 1408 x 1408. QK norm and full-context causal SDPA are used.</span>
+                <span class="tag">22 heads, head_dim 64</span>
+              </div>
+              <div class="sub">
+                <span class="name">MLP</span>
+                <span class="desc">Two matrix projections: 1408 → 5632 and 5632 → 1408 with ReLU squared activation.</span>
+                <span class="tag">4x expansion</span>
+              </div>
+            </div>
+            <div class="block">
+              <div class="sub">
+                <span class="name">Residual Controls</span>
+                <span class="desc">Per-layer residual lambdas and x0 lambdas blend residual stream behavior.</span>
+              </div>
+              <div class="sub">
+                <span class="name">Value Embeddings</span>
+                <span class="desc">Alternating ResFormer-style value embedding tables feed selected attention layers.</span>
+                <span class="tag">large parameter group</span>
+              </div>
+              <div class="sub">
+                <span class="name">Repeated 22x</span>
+                <span class="desc">The core Transformer matrix count is about 23.79M parameters per block.</span>
+              </div>
+            </div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="node">
+            <strong>Logits</strong>
+            <span>Final RMSNorm then untied LM head over 32,768 vocabulary tokens.</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Parameter Breakdown</h2>
+        <div class="param-list">
+          <div class="bar-row">
+            <div class="bar-label">Value embeddings</div>
+            <div class="bar-track"><div class="bar-fill blue" style="width:45.19%"></div></div>
+            <div class="bar-value">507.5M</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Transformer core</div>
+            <div class="bar-track"><div class="bar-fill green" style="width:46.60%"></div></div>
+            <div class="bar-value">523.4M</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Token embedding</div>
+            <div class="bar-track"><div class="bar-fill cyan" style="width:4.11%"></div></div>
+            <div class="bar-value">46.1M</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">LM head</div>
+            <div class="bar-track"><div class="bar-fill amber" style="width:4.11%"></div></div>
+            <div class="bar-value">46.1M</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Scalars</div>
+            <div class="bar-track"><div class="bar-fill red" style="width:0.05%"></div></div>
+            <div class="bar-value">70</div>
+          </div>
+        </div>
+
+        <table style="margin-top:16px">
+          <thead>
+            <tr><th>Group</th><th>Count</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Token embedding</td><td>46,137,344</td></tr>
+            <tr><td>Value embeddings</td><td>507,510,784</td></tr>
+            <tr><td>LM head</td><td>46,137,344</td></tr>
+            <tr><td>Transformer matrices</td><td>523,373,400</td></tr>
+            <tr><td>Scalars</td><td>70</td></tr>
+            <tr><td><strong>Total</strong></td><td><strong>1,123,158,942</strong></td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <div class="notes">
+      <section>
+        <h2>Per-Block Core Math</h2>
+        <div class="formula">
+Attention matrices per layer:<br>
+4 * 1408 * 1408 = 7,929,856<br><br>
+MLP matrices per layer:<br>
+2 * 1408 * 5632 = 15,859,712<br><br>
+Core per layer:<br>
+~23.79M parameters<br><br>
+Core across 22 layers:<br>
+~23.79M * 22 = ~523M
+        </div>
+      </section>
+
+      <section>
+        <h2>Interpretation</h2>
+        <ul class="note-list">
+          <li>The wiki-style capability scale is closest to the Transformer core parameter count.</li>
+          <li>The full checkpoint is larger because nanochat also includes untied embeddings and large value embedding tables.</li>
+          <li>The current d22 model is in the same core-parameter range as the wiki's d24-d26 GPT-2 capability band.</li>
+          <li>The active training run uses two RTX 5090 GPUs and consumes roughly 30.7GB per GPU.</li>
+        </ul>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

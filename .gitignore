@@ -1,0 +1,45 @@
+# macOS / editor
+.DS_Store
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+.eval-venv/
+.plot-venv/
+.env
+
+# Local Codex scratch
+.codex-tmp/
+
+# Large/generated training artifacts
+chinese_cache/base_checkpoints/
+chinese_cache/base_data_climbmix/
+chinese_cache/hf_models/
+chinese_cache/tokenizer/
+chinese_cache/final_eval_results/
+chinese_cache_reproduce/
+runs/logs/
+
+# HuggingFace/dataset caches
+data/
+.cache/
+
+# Generic model/data artifacts
+*.tgz
+*.tar.gz
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.parquet
+*.arrow
+*.ckpt
+*.h5

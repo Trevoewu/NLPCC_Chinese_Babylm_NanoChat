@@ -1,0 +1,53 @@
+# Chinese BabyLM 2026 official evaluation configuration.
+# This file freezes the evaluation settings used for the hidden evaluation.
+
+models:
+  - path: l0ulan/chinese-babylm-nanochat-d22-step10000
+    backend: causal
+
+tasks:
+  zero_shot:
+    - zhoblimp
+    - hanzi_structure
+    - hanzi_pinyin
+
+  cogbench:
+    - word_fmri
+    - fmri
+
+  finetune:
+    - afqmc
+    - ocnli
+    - tnews
+    - cluewsc2020
+
+eval_dir: evaluation_data
+results_dir: results
+
+save_item_with_unk: true
+
+# NLU Track fine-tuning hyperparameters, fixed before hidden-task release.
+finetune_hparams:
+  lr: 3.0e-5
+  batch_size: 32
+  max_epochs: 10
+  sequence_length: 128
+  seed: 42
+
+  task_overrides:
+    afqmc:
+      lr: 3.0e-5
+      batch_size: 32
+      max_epochs: 10
+    ocnli:
+      lr: 3.0e-5
+      batch_size: 32
+      max_epochs: 10
+    tnews:
+      lr: 3.0e-5
+      batch_size: 32
+      max_epochs: 10
+    cluewsc2020:
+      lr: 3.0e-5
+      batch_size: 32
+      max_epochs: 30
