@@ -31,8 +31,10 @@ MODEL_REVISION="7945c2a48ea4b4555509616b6942116782ef6295"
 CONFIG_SRC="${CONFIG_SRC:-eval_configs/config_final.yaml}"
 CONFIG_DST="configs/babyllm_final.yaml"
 RESULT_JSON="${RESULT_JSON:-chinese_cache_reproduce/chinesebabylm_2026_final_results.json}"
-PARALLEL_EVAL="${PARALLEL_EVAL:-1}"
+PARALLEL_EVAL="${PARALLEL_EVAL:-0}"
 RESULTS_DIR="${RESULTS_DIR:-chinese_cache_reproduce/final_eval_results}"
+EVAL_GPU0="${EVAL_GPU0:-0}"
+EVAL_GPU1="${EVAL_GPU1:-1}"
 
 PIPELINE_DIR_ABS="$(resolve_path "${PIPELINE_DIR}")"
 VENV_DIR_ABS="$(resolve_path "${VENV_DIR}")"
@@ -45,7 +47,7 @@ REQUIREMENTS_STAMP="${VENV_DIR_ABS}/.final_pipeline_requirements_installed"
 
 export HF_ENDPOINT="${HF_ENDPOINT:-https://hf-mirror.com}"
 export TOKENIZERS_PARALLELISM=false
-export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-0}"
+export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-${EVAL_GPU0}}"
 
 if [[ -z "${BOOTSTRAP_PYTHON:-}" ]]; then
   if command -v python3 >/dev/null 2>&1; then
@@ -140,19 +142,19 @@ if [[ "${PARALLEL_EVAL}" == "1" ]]; then
   GPU0_LOG="$(dirname "${RESULT_JSON_ABS}")/final_eval_gpu0.log"
   GPU1_LOG="$(dirname "${RESULT_JSON_ABS}")/final_eval_gpu1.log"
 
-  CUDA_VISIBLE_DEVICES=0 "${VENV_DIR_ABS}/bin/python" pipeline.py eval \
+  CUDA_VISIBLE_DEVICES="${EVAL_GPU0}" "${VENV_DIR_ABS}/bin/python" pipeline.py eval \
     --config "${CONFIG_DST}" --tasks \
     zhoblimp xcomps_zh \
     hanzi_structure hanzi_pinyin \
     hanzi_structure_hidden hanzi_pinyin_hidden \
     word_fmri fmri
 
-  CUDA_VISIBLE_DEVICES=0 "${VENV_DIR_ABS}/bin/python" pipeline.py eval \
+  CUDA_VISIBLE_DEVICES="${EVAL_GPU0}" "${VENV_DIR_ABS}/bin/python" pipeline.py eval \
     --config "${CONFIG_DST}" --tasks afqmc ocnli tnews \
     >"${GPU0_LOG}" 2>&1 &
   gpu0_pid=$!
 
-  CUDA_VISIBLE_DEVICES=1 "${VENV_DIR_ABS}/bin/python" pipeline.py eval \
+  CUDA_VISIBLE_DEVICES="${EVAL_GPU1}" "${VENV_DIR_ABS}/bin/python" pipeline.py eval \
     --config "${CONFIG_DST}" --tasks cluewsc2020 c3 diagnostic_nli \
     >"${GPU1_LOG}" 2>&1 &
   gpu1_pid=$!
@@ -166,7 +168,7 @@ if [[ "${PARALLEL_EVAL}" == "1" ]]; then
     exit 1
   fi
 else
-  "${VENV_DIR_ABS}/bin/python" pipeline.py eval --config "${CONFIG_DST}"
+  CUDA_VISIBLE_DEVICES="${EVAL_GPU0}" "${VENV_DIR_ABS}/bin/python" pipeline.py eval --config "${CONFIG_DST}"
 fi
 "${VENV_DIR_ABS}/bin/python" pipeline.py gather --config "${CONFIG_DST}" --export "${RESULT_JSON_ABS}"
 

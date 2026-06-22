@@ -1,6 +1,6 @@
 # Chinese BabyLM nanochat
 
-This workspace adapts `karpathy/nanochat` for the NLPCC Chinese BabyLM task. It contains the recovered training/evaluation code, Chinese tokenizer/data preparation scripts, final evaluation artifacts, and a base-model continuation CLI. Large generated artifacts such as tokenizer files, training shards, checkpoints, and HuggingFace model exports are intentionally not committed; the reproduction script regenerates or downloads them as needed.
+This workspace adapts `karpathy/nanochat` for the NLPCC Chinese BabyLM task. It contains the recovered training/evaluation code, Chinese tokenizer/data preparation scripts, archived final evaluation artifacts, and a base-model continuation CLI. Large generated artifacts such as tokenizer files, training shards, checkpoints, training logs, and HuggingFace model exports are intentionally not committed; the reproduction script regenerates or downloads them as needed.
 
 ## Organizer Reproduction
 
@@ -60,10 +60,10 @@ docs/zh_d22_recovered_loss_curve.png
 docs/zh_d22_recovered_loss_curve.csv
 ```
 
-Training log:
+Reproduction training logs:
 
 ```text
-runs/logs/base_train_zh_d22_1gpu_recovered_20260527_181434.log
+runs/logs/reproduce_zh-d22-2gpu_*.log
 ```
 
 ## Environment
@@ -78,7 +78,7 @@ Common environment variables:
 
 ```bash
 export HF_ENDPOINT=https://hf-mirror.com
-export NANOCHAT_BASE_DIR="${PWD}/chinese_cache_reproduce"
+export NANOCHAT_BASE_DIR="chinese_cache_reproduce"
 export NANOCHAT_DTYPE=bfloat16
 export NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS=1
 export NANOCHAT_DISABLE_COMPILE=1
@@ -100,7 +100,7 @@ bash runs/setup_recovered_env.sh
 
 ## Data Preparation
 
-The Chinese BabyLM dataset is linked here:
+The Chinese BabyLM dataset is downloaded or provided at the default local path:
 
 ```text
 data/babylm-zho-100M
@@ -111,7 +111,7 @@ Prepare nanochat parquet shards:
 ```bash
 . .venv/bin/activate
 
-export NANOCHAT_BASE_DIR="${PWD}/chinese_cache_reproduce"
+export NANOCHAT_BASE_DIR="chinese_cache_reproduce"
 
 python scripts/prepare_chinese_babylm.py \
   --data-dir data/babylm-zho-100M \
@@ -136,7 +136,7 @@ Train the 32K Chinese tokenizer:
 ```bash
 . .venv/bin/activate
 
-export NANOCHAT_BASE_DIR="${PWD}/chinese_cache_reproduce"
+export NANOCHAT_BASE_DIR="chinese_cache_reproduce"
 
 python -m nanochat.report reset
 python -m scripts.tok_train \
@@ -179,7 +179,7 @@ Command used:
 . .venv/bin/activate
 
 export HF_ENDPOINT=https://hf-mirror.com
-export NANOCHAT_BASE_DIR="${PWD}/chinese_cache_reproduce"
+export NANOCHAT_BASE_DIR="chinese_cache_reproduce"
 export NANOCHAT_DTYPE=bfloat16
 export NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS=1
 export NANOCHAT_DISABLE_COMPILE=1
@@ -190,6 +190,7 @@ export WANDB_MODE=disabled
 
 python -m scripts.base_train \
   --depth 22 \
+  --aspect-ratio 64 \
   --head-dim 64 \
   --window-pattern L \
   --max-seq-len 1024 \
@@ -204,7 +205,7 @@ python -m scripts.base_train \
   --model-tag zh-d22-2gpu
 ```
 
-Final training stats:
+Archived final training stats from the recovered run:
 
 ```text
 final train loss: 0.015389
@@ -223,7 +224,10 @@ import re
 from pathlib import Path
 import matplotlib.pyplot as plt
 
-log = Path("runs/logs/base_train_zh_d22_1gpu_recovered_20260527_181434.log")
+logs = sorted(Path("runs/logs").glob("reproduce_zh-d22-2gpu_*.log"))
+if not logs:
+    raise SystemExit("No reproduction training log found under runs/logs")
+log = logs[-1]
 out = Path("docs/zh_d22_recovered_loss_curve.png")
 pat = re.compile(r"step\s+(\d+)/(\d+).*?loss:\s+([0-9.]+)")
 steps, losses = [], []
@@ -254,7 +258,7 @@ One-shot continuation:
 . .venv/bin/activate
 
 CUDA_VISIBLE_DEVICES=0 \
-NANOCHAT_BASE_DIR="${PWD}/chinese_cache_reproduce" \
+NANOCHAT_BASE_DIR="chinese_cache_reproduce" \
 NANOCHAT_DTYPE=bfloat16 \
 NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS=1 \
 NANOCHAT_DISABLE_COMPILE=1 \
@@ -272,7 +276,7 @@ Interactive continuation:
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 \
-NANOCHAT_BASE_DIR="${PWD}/chinese_cache_reproduce" \
+NANOCHAT_BASE_DIR="chinese_cache_reproduce" \
 NANOCHAT_DTYPE=bfloat16 \
 NANOCHAT_DISABLE_EXPANDABLE_SEGMENTS=1 \
 NANOCHAT_DISABLE_COMPILE=1 \
@@ -317,11 +321,13 @@ docs/chinese_babylm_eval_todo.md
 If re-running final eval from an exported model:
 
 ```bash
-MODEL_DIR="${PWD}/chinese_cache_reproduce/hf_models/zh-d22-step10000-layer08-selected" \
-RESULTS_DIR="${PWD}/chinese_cache_reproduce/final_eval_results" \
-RESULT_JSON="${PWD}/chinese_cache_reproduce/chinesebabylm_2026_final_results.json" \
+MODEL_DIR="chinese_cache_reproduce/hf_models/zh-d22-step10000-layer08-selected" \
+RESULTS_DIR="chinese_cache_reproduce/final_eval_results" \
+RESULT_JSON="chinese_cache_reproduce/chinesebabylm_2026_final_results.json" \
 bash scripts/run_final_eval.sh
 ```
+
+Final eval defaults to one GPU for portability. On a two-GPU machine, use `PARALLEL_EVAL=1 EVAL_GPU0=0 EVAL_GPU1=1 bash scripts/run_final_eval.sh` to parallelize NLU fine-tuning tasks.
 
 ### Baseline Comparison
 

@@ -42,7 +42,7 @@ Approximate runtime on the original environment:
 | tokenizer/data preparation | minutes to tens of minutes |
 | d22 base training, 10000 steps | about 6.1 hours |
 | HF export | minutes |
-| final evaluation | task dependent; NLU is parallelized over 2 GPUs when available |
+| final evaluation | task dependent; defaults to one GPU; NLU can be parallelized over 2 GPUs |
 
 For RTX 5090 / Blackwell, the final evaluation script automatically replaces the official pipeline's default `torch==2.7.0` CUDA 12.6 wheel with `torch==2.7.0+cu128`, because the CUDA 12.6 wheel does not include `sm_120` kernels.
 
@@ -185,13 +185,13 @@ eval_configs/config_final.yaml
 Run directly from a trained/exported model:
 
 ```bash
-MODEL_DIR="${PWD}/chinese_cache_reproduce/hf_models/zh-d22-step10000-layer08-selected" \
-RESULTS_DIR="${PWD}/chinese_cache_reproduce/final_eval_results" \
-RESULT_JSON="${PWD}/chinese_cache_reproduce/chinesebabylm_2026_final_results.json" \
+MODEL_DIR="chinese_cache_reproduce/hf_models/zh-d22-step10000-layer08-selected" \
+RESULTS_DIR="chinese_cache_reproduce/final_eval_results" \
+RESULT_JSON="chinese_cache_reproduce/chinesebabylm_2026_final_results.json" \
 bash scripts/run_final_eval.sh
 ```
 
-The script first evaluates zero-shot and cognitive tasks, then parallelizes NLU fine-tuning tasks across GPU 0 and GPU 1 when `PARALLEL_EVAL=1`.
+The script defaults to one GPU for portability. If two GPUs are available, set `PARALLEL_EVAL=1 EVAL_GPU0=0 EVAL_GPU1=1` to parallelize NLU fine-tuning tasks.
 
 ## Submitted Final Scores
 
@@ -238,4 +238,4 @@ PARALLEL_EVAL=0 \
 bash scripts/reproduce_from_training.sh
 ```
 
-Set `PARALLEL_EVAL=0` if only one GPU is available for final evaluation.
+Set `PARALLEL_EVAL=1 EVAL_GPU0=0 EVAL_GPU1=1` to use two GPUs during final evaluation.

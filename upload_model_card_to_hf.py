@@ -13,10 +13,7 @@ def main() -> None:
     if not token:
         raise SystemExit("HF_TOKEN is not set")
 
-    default_model_card = (
-        Path(__file__).resolve().parent
-        / "chinese_cache/hf_models/zh-d22-step10000/README.modelcard.md"
-    )
+    default_model_card = Path(__file__).resolve().parent / "docs/model_card_zh_d22_step10000.md"
     model_card = Path(os.environ.get("MODEL_CARD", default_model_card))
     if not model_card.exists():
         raise SystemExit(f"Missing model card: {model_card}")

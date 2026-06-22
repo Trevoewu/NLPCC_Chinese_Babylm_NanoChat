@@ -24,7 +24,10 @@ def main() -> None:
     if not token:
         raise SystemExit("HF_TOKEN is not set")
 
-    default_folder = Path(__file__).resolve().parent / "chinese_cache/hf_models/zh-d22-step10000"
+    default_folder = (
+        Path(__file__).resolve().parent
+        / "chinese_cache_reproduce/hf_models/zh-d22-step10000-layer08-selected"
+    )
     folder = Path(os.environ.get("MODEL_DIR", default_folder))
     required = [
         "config.json",

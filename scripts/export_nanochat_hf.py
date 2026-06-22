@@ -11,6 +11,7 @@ import torch
 
 
 DEFAULT_PROJECT_DIR = Path(__file__).resolve().parents[1]
+DEFAULT_BASE_DIR = Path(os.environ.get("NANOCHAT_BASE_DIR", DEFAULT_PROJECT_DIR / "chinese_cache_reproduce"))
 
 
 CONFIGURATION_PY = r'''
@@ -451,18 +452,18 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--checkpoint-dir",
-        default=str(DEFAULT_PROJECT_DIR / "chinese_cache/base_checkpoints/zh-d22-2gpu"),
+        default=str(DEFAULT_BASE_DIR / "base_checkpoints/zh-d22-2gpu"),
     )
     parser.add_argument("--step", type=int, default=10000)
-    parser.add_argument("--tokenizer-dir", default=str(DEFAULT_PROJECT_DIR / "chinese_cache/tokenizer"))
+    parser.add_argument("--tokenizer-dir", default=str(DEFAULT_BASE_DIR / "tokenizer"))
     parser.add_argument(
         "--output-dir",
-        default=str(DEFAULT_PROJECT_DIR / "chinese_cache/hf_models/zh-d22-step10000"),
+        default=str(DEFAULT_BASE_DIR / "hf_models/zh-d22-step10000-layer08-selected"),
     )
     parser.add_argument(
         "--representation-layer",
         type=int,
-        default=-1,
+        default=8,
         help=(
             "Layer exposed as AutoModel.last_hidden_state for representation tasks. "
             "0 is after block 0; n_layer-1 is after the last block before backout; -1 is final normalized output."
@@ -471,7 +472,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--representation-hidden-states-mode",
         choices=["all", "selected_only", "selected_last"],
-        default="all",
+        default="selected_only",
         help=(
             "Controls AutoModel output_hidden_states for representation tasks. "
             "'all' exposes every layer; 'selected_only' makes hidden_states[-1] equal "
@@ -507,7 +508,7 @@ def main() -> None:
             "AutoConfig": "configuration_nanochat.NanoChatConfig",
             "AutoModel": "modeling_nanochat.NanoChatModel",
             "AutoModelForCausalLM": "modeling_nanochat.NanoChatForCausalLM",
-            "AutoTokenizer": ["tokenization_nanochat.NanoChatTokenizer", None],
+            "AutoTokenizer": "tokenization_nanochat.NanoChatTokenizer",
         },
         "torch_dtype": "bfloat16",
         "bos_token_id": bos_token_id,
@@ -519,7 +520,7 @@ def main() -> None:
     }
     (output_dir / "config.json").write_text(json.dumps(config, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     (output_dir / "tokenizer_config.json").write_text(json.dumps({
-        "auto_map": {"AutoTokenizer": ["tokenization_nanochat.NanoChatTokenizer", None]},
+        "auto_map": {"AutoTokenizer": "tokenization_nanochat.NanoChatTokenizer"},
         "bos_token": "<|bos|>",
         "eos_token": "<|bos|>",
         "pad_token": "<|bos|>",

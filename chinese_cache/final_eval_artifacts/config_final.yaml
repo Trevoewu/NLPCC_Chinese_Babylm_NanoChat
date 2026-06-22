@@ -5,7 +5,7 @@
 # the final pipeline's released hidden tasks are added here.
 
 models:
-  - path: /mnt/proj/babyllm/chinese_cache/hf_models/zh-d22-step10000-layer08-selected
+  - path: chinese_cache/hf_models/zh-d22-step10000-layer08-selected
     backend: causal
 
 tasks:
@@ -30,7 +30,7 @@ tasks:
     - diagnostic_nli
 
 eval_dir: evaluation_data
-results_dir: /mnt/proj/babyllm/chinese_cache/final_eval_results
+results_dir: chinese_cache/final_eval_results
 
 save_item_with_unk: true
 
