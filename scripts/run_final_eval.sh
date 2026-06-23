@@ -66,8 +66,27 @@ if [[ ! -f "${PIPELINE_DIR_ABS}/pipeline.py" ]]; then
   wget -q -O "${archive}" \
     https://github.com/chinese-babylm/chinese-babylm-pipeline-final/archive/refs/heads/main.zip
   rm -rf "${PIPELINE_DIR_ABS}" "${PIPELINE_DIR_ABS}-main"
-  unzip -q "${archive}" -d "$(dirname "${PIPELINE_DIR_ABS}")"
-  mv "${PIPELINE_DIR_ABS}-main" "${PIPELINE_DIR_ABS}"
+  ARCHIVE="${archive}" PIPELINE_DIR="${PIPELINE_DIR_ABS}" "${BOOTSTRAP_PYTHON}" - <<'PY'
+import os
+import shutil
+import tempfile
+import zipfile
+from pathlib import Path
+
+archive = Path(os.environ["ARCHIVE"])
+pipeline_dir = Path(os.environ["PIPELINE_DIR"])
+parent = pipeline_dir.parent
+tmp_dir = Path(tempfile.mkdtemp(prefix=f"{pipeline_dir.name}.", dir=parent))
+try:
+    with zipfile.ZipFile(archive) as zf:
+        zf.extractall(tmp_dir)
+    roots = [path for path in tmp_dir.iterdir() if path.is_dir()]
+    if len(roots) != 1:
+        raise RuntimeError(f"Expected one extracted root directory, found: {roots}")
+    shutil.move(str(roots[0]), str(pipeline_dir))
+finally:
+    shutil.rmtree(tmp_dir, ignore_errors=True)
+PY
   rm -f "${archive}"
 fi
 
