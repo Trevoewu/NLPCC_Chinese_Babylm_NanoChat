@@ -226,6 +226,29 @@ SHA-256:
 b0a402ff1a3c70f7cf796671c4dc3d6c1c66ba0b1d5708d668b6459db73410e6
 ```
 
+## Fresh From-Training Reproduction Check
+
+A clean-clone reproduction run completed on 2026-06-23 from the official corpus through final evaluation. The run produced `chinese_cache_reproduce/chinesebabylm_2026_final_results.json` with all 14 final tasks present.
+
+| Task | Reproduced score |
+| --- | ---: |
+| zhoblimp | 68.43 |
+| xcomps_zh | 54.52 |
+| hanzi_structure | 51.80 |
+| hanzi_pinyin | 50.55 |
+| hanzi_structure_hidden | 51.60 |
+| hanzi_pinyin_hidden | 49.00 |
+| word_fmri | 56.25 |
+| fmri | 11.38 |
+| afqmc | 69.05 |
+| ocnli | 65.97 |
+| tnews | 54.03 |
+| cluewsc2020 | 62.50 |
+| c3 | 28.43 |
+| diagnostic_nli | 50.90 |
+
+The reproduced sum across the 14 final tasks was `724.4013`, compared with `724.4100` for the archived submitted checkpoint result. This is effectively identical at the aggregate level; per-task values differ slightly because GPU training and downstream fine-tuning are not bitwise deterministic across runs.
+
 ## Useful Overrides
 
 The reproduction script accepts environment overrides:

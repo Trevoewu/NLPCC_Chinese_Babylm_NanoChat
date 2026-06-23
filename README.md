@@ -18,6 +18,8 @@ Detailed instructions, expected artifacts, and final scores are documented in:
 docs/reproduce_from_training.md
 ```
 
+The one-command reproduction was re-run from training data on 2026-06-23 in a clean clone. It completed training, HF export, and final evaluation with 14/14 tasks gathered; the reproduced final-task sum was 724.4013. See `docs/reproduce_from_training.md` for the per-task check.
+
 The reproduction pipeline uses the official `chinese-babylm-org/babylm-zho-100M` corpus, trains the 32K tokenizer, trains the d22 base model from random initialization for 10,000 steps, exports the step-10000 checkpoint as HuggingFace `trust_remote_code` CausalLM with cognitive `representation_layer=8`, and runs the official final pipeline.
 
 The script defaults to repository-local generated directories. Override paths when needed:
