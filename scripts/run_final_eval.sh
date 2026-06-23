@@ -23,6 +23,14 @@ display_path() {
   esac
 }
 
+python_at_least_311() {
+  "$1" - <<'PY'
+import sys
+
+raise SystemExit(0 if sys.version_info >= (3, 11) else 1)
+PY
+}
+
 PIPELINE_DIR="${PIPELINE_DIR:-.external/chinese-babylm-pipeline-final}"
 VENV_DIR="${VENV_DIR:-.venv-final-eval}"
 MODEL_DIR="${MODEL_DIR:-chinese_cache_reproduce/hf_models/zh-d22-step10000-layer08-selected}"
@@ -50,7 +58,9 @@ export TOKENIZERS_PARALLELISM=false
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES:-${EVAL_GPU0}}"
 
 if [[ -z "${BOOTSTRAP_PYTHON:-}" ]]; then
-  if command -v python3 >/dev/null 2>&1; then
+  if [[ -x "${PROJECT_DIR_ABS}/.venv/bin/python" ]]; then
+    BOOTSTRAP_PYTHON="${PROJECT_DIR_ABS}/.venv/bin/python"
+  elif command -v python3 >/dev/null 2>&1; then
     BOOTSTRAP_PYTHON="$(command -v python3)"
   elif command -v python >/dev/null 2>&1; then
     BOOTSTRAP_PYTHON="$(command -v python)"
@@ -58,6 +68,13 @@ if [[ -z "${BOOTSTRAP_PYTHON:-}" ]]; then
     echo "No bootstrap Python found. Set BOOTSTRAP_PYTHON=/path/to/python." >&2
     exit 1
   fi
+fi
+
+if ! python_at_least_311 "${BOOTSTRAP_PYTHON}"; then
+  echo "Final eval requires Python >= 3.11 because the official pipeline pins packages that require it." >&2
+  echo "Selected bootstrap Python is too old: ${BOOTSTRAP_PYTHON}" >&2
+  echo "Run runs/setup_recovered_env.sh first, or set BOOTSTRAP_PYTHON=/path/to/python3.11." >&2
+  exit 1
 fi
 
 if [[ ! -f "${PIPELINE_DIR_ABS}/pipeline.py" ]]; then
@@ -88,6 +105,11 @@ finally:
     shutil.rmtree(tmp_dir, ignore_errors=True)
 PY
   rm -f "${archive}"
+fi
+
+if [[ -x "${VENV_DIR_ABS}/bin/python" ]] && ! python_at_least_311 "${VENV_DIR_ABS}/bin/python"; then
+  echo "Recreating final eval venv because existing Python is older than 3.11: ${VENV_DIR}" >&2
+  rm -rf "${VENV_DIR_ABS}"
 fi
 
 if [[ ! -x "${VENV_DIR_ABS}/bin/python" ]]; then
